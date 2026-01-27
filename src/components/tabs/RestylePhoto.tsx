@@ -6,8 +6,10 @@ import {
   Sparkles, 
   X
 } from 'lucide-react'
+import { useAssets } from '@/context/AssetContext'
 
 export default function RestylePhoto() {
+  const { addAsset } = useAssets()
   const [dragOver, setDragOver] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [currentImage, setCurrentImage] = useState<string | null>(null)
@@ -74,6 +76,14 @@ export default function RestylePhoto() {
         }
 
         setResultImage(data.outputUrl)
+        
+        // Add to asset library
+        addAsset({
+          url: data.outputUrl,
+          type: 'restyle',
+          label: 'yellow',
+          prompt: 'Restyled image'
+        })
       } catch (err) {
         console.error('Processing error:', err)
         setError(err instanceof Error ? err.message : 'Failed to process image')

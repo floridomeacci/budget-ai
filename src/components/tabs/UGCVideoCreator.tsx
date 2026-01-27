@@ -12,6 +12,7 @@ import {
   X,
   Package
 } from 'lucide-react'
+import { useAssets } from '@/context/AssetContext'
 
 interface Actor {
   id: string
@@ -45,6 +46,7 @@ const products: Product[] = [
 ]
 
 export default function UGCVideoCreator() {
+  const { addAsset } = useAssets()
   const [selectedActor, setSelectedActor] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
   const [script, setScript] = useState('')
@@ -102,6 +104,15 @@ export default function UGCVideoCreator() {
       }
 
       setGeneratedImage(data.outputUrl)
+      
+      // Add to asset library
+      addAsset({
+        url: data.outputUrl,
+        type: 'ugc',
+        label: 'yellow',
+        actor: selectedActorData?.name,
+        product: selectedProductData?.name
+      })
     } catch (err) {
       console.error('Generation error:', err)
       setError(err instanceof Error ? err.message : 'Failed to generate')

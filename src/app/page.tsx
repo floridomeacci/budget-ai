@@ -9,6 +9,7 @@ import {
   FolderOpen,
   Leaf
 } from 'lucide-react'
+import { AssetProvider } from '@/context/AssetContext'
 import RestylePhoto from '@/components/tabs/RestylePhoto'
 import CreatePhoto from '@/components/tabs/CreatePhoto'
 import CreativeReviewer from '@/components/tabs/CreativeReviewer'
@@ -57,25 +58,8 @@ const tabs: Tab[] = [
   },
 ]
 
-export default function Dashboard() {
+function DashboardContent() {
   const [activeTab, setActiveTab] = useState<TabId>('restyle')
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'restyle':
-        return <RestylePhoto />
-      case 'create':
-        return <CreatePhoto />
-      case 'review':
-        return <CreativeReviewer />
-      case 'video':
-        return <UGCVideoCreator />
-      case 'library':
-        return <AssetLibrary />
-      default:
-        return null
-    }
-  }
 
   return (
     <div className="min-h-screen bg-bt-gray-100 flex flex-col">
@@ -138,9 +122,23 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - All tabs rendered, visibility controlled by CSS */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
-        {renderTabContent()}
+        <div className={activeTab === 'restyle' ? '' : 'hidden'}>
+          <RestylePhoto />
+        </div>
+        <div className={activeTab === 'create' ? '' : 'hidden'}>
+          <CreatePhoto />
+        </div>
+        <div className={activeTab === 'review' ? '' : 'hidden'}>
+          <CreativeReviewer />
+        </div>
+        <div className={activeTab === 'video' ? '' : 'hidden'}>
+          <UGCVideoCreator />
+        </div>
+        <div className={activeTab === 'library' ? '' : 'hidden'}>
+          <AssetLibrary />
+        </div>
       </main>
 
       {/* Footer */}
@@ -158,5 +156,13 @@ export default function Dashboard() {
         </div>
       </footer>
     </div>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <AssetProvider>
+      <DashboardContent />
+    </AssetProvider>
   )
 }

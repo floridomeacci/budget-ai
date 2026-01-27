@@ -9,6 +9,7 @@ import {
   Check,
   ImageIcon
 } from 'lucide-react'
+import { useAssets } from '@/context/AssetContext'
 
 interface Actor {
   id: string
@@ -34,6 +35,7 @@ const actors: Actor[] = [
 ]
 
 export default function CreatePhoto() {
+  const { addAsset } = useAssets()
   const [selectedActor, setSelectedActor] = useState<string | null>(null)
   const [prompt, setPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -87,6 +89,17 @@ export default function CreatePhoto() {
       
       setGeneratedImages(newImages)
       setSelectedImage(newImages[0]?.id || null)
+      
+      // Add all generated images to asset library
+      newImages.forEach((img: GeneratedImage) => {
+        addAsset({
+          url: img.imageUrl,
+          type: 'create',
+          label: 'yellow',
+          prompt: prompt,
+          actor: selectedActorData?.name
+        })
+      })
     } catch (err) {
       console.error('Generation error:', err)
       setError(err instanceof Error ? err.message : 'Failed to generate images')
