@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, referenceImageUrl, duration = 8 } = await request.json()
+    const { prompt, referenceImageUrl } = await request.json()
 
     if (!prompt) {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Replicate API token not configured' }, { status: 500 })
     }
 
-    // Build the input object
+    // Build the input object for Veo 3.1
     const input: {
       prompt: string
       duration: number
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       reference_images?: { value: string }[]
     } = {
       prompt,
-      duration,
+      duration: 8,
       resolution: '1080p',
       aspect_ratio: '9:16',
       generate_audio: true,
@@ -35,28 +35,59 @@ export async function POST(request: NextRequest) {
       input.reference_images = [{ value: referenceImageUrl }]
     }
 
-    // Call Replicate API for Veo 3.1
-    const response = await fetch('https://api.replicate.com/v1/models/google/veo-3.1/predictions', {
+    // Create prediction
+    const createResponse = await fetch('https://api.replicate.com/v1/models/google/veo-3.1/predictions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
         'Content-Type': 'application/json',
-        'Prefer': 'wait',
       },
       body: JSON.stringify({ input }),
     })
 
-    const data = await response.json()
+    const prediction = await createResponse.json()
 
-    if (!response.ok) {
-      console.error('Replicate API error:', data)
+    if (!createResponse.ok) {
+      console.error('Replicate API error:', prediction)
       return NextResponse.json({ 
-        error: data.detail || data.error || 'Failed to generate video' 
-      }, { status: response.status })
+        error: prediction.detail || prediction.error || 'Failed to start video generation' 
+      }, { status: createResponse.status })
+    }
+
+    // Poll for completion
+    let result = prediction
+    const maxAttempts = 120 // 10 minutes max (5 second intervals)
+    let attempts = 0
+
+    while (result.status !== 'succeeded' && result.status !== 'failed' && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
+      
+      const pollResponse = await fetch(result.urls.get, {
+        headers: {
+          'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
+        },
+      })
+      
+      result = await pollResponse.json()
+      attempts++
+      
+      console.log(`Video generation status: ${result.status} (attempt ${attempts})`)
+    }
+
+    if (result.status === 'failed') {
+      return NextResponse.json({ 
+        error: result.error || 'Video generation failed' 
+      }, { status: 500 })
+    }
+
+    if (result.status !== 'succeeded') {
+      return NextResponse.json({ 
+        error: 'Video generation timed out' 
+      }, { status: 504 })
     }
 
     // The output should be the video URL
-    const outputUrl = data.output
+    const outputUrl = result.output
 
     if (!outputUrl) {
       return NextResponse.json({ error: 'No video generated' }, { status: 500 })
@@ -65,7 +96,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       outputUrl,
-      id: data.id
+      id: result.id
     })
 
   } catch (error) {

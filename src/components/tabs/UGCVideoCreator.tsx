@@ -357,12 +357,12 @@ export default function UGCVideoCreator() {
             {isGeneratingVideo ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Genereren...
+                Genereren... (±2-5 min)
               </>
             ) : (
               <>
                 <Video className="w-4 h-4" />
-                Genereer Video
+                Genereer Video (8 sec)
               </>
             )}
           </button>
