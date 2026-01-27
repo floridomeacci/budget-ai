@@ -51,7 +51,9 @@ export default function UGCVideoCreator() {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
   const [script, setScript] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
+  const [generatedVideo, setGeneratedVideo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const selectedActorData = actors.find(a => a.id === selectedActor)
@@ -121,8 +123,43 @@ export default function UGCVideoCreator() {
     }
   }
 
+  const handleGenerateVideo = async () => {
+    if (!generatedImage || !script.trim()) return
+    
+    setIsGeneratingVideo(true)
+    setGeneratedVideo(null)
+
+    try {
+      const response = await fetch('/api/create-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: `${selectedActorData?.name || 'Person'} presenting ${selectedProductData?.name || 'product'}: ${script}`,
+          referenceImageUrl: generatedImage,
+          duration: 8,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate video')
+      }
+
+      setGeneratedVideo(data.outputUrl)
+    } catch (err) {
+      console.error('Video generation error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate video')
+    } finally {
+      setIsGeneratingVideo(false)
+    }
+  }
+
   const clearImage = () => {
     setGeneratedImage(null)
+    setGeneratedVideo(null)
     setSelectedActor(null)
     setSelectedProduct(null)
   }
@@ -147,10 +184,10 @@ export default function UGCVideoCreator() {
               <button
                 key={actor.id}
                 onClick={() => setSelectedActor(actor.id)}
-                className={`rounded-bt-lg border-2 transition-all duration-200 overflow-hidden ${
+                className={`rounded-bt-lg transition-all duration-200 overflow-hidden ${
                   selectedActor === actor.id
-                    ? 'border-bt-green-500'
-                    : 'border-bt-gray-200 hover:border-bt-green-300'
+                    ? 'ring-4 ring-black border-2 border-black'
+                    : 'border-2 border-bt-gray-200 hover:border-bt-green-300'
                 }`}
               >
                 <div className="aspect-square relative">
@@ -177,10 +214,10 @@ export default function UGCVideoCreator() {
               <button
                 key={product.id}
                 onClick={() => setSelectedProduct(product.id)}
-                className={`rounded-bt-lg border-2 transition-all duration-200 overflow-hidden ${
+                className={`rounded-bt-lg transition-all duration-200 overflow-hidden ${
                   selectedProduct === product.id
-                    ? 'border-bt-green-500'
-                    : 'border-bt-gray-200 hover:border-bt-green-300'
+                    ? 'ring-4 ring-black border-2 border-black'
+                    : 'border-2 border-bt-gray-200 hover:border-bt-green-300'
                 }`}
               >
                 <div className="aspect-square relative">
@@ -268,12 +305,21 @@ export default function UGCVideoCreator() {
           <button
             onClick={handleGenerate}
             disabled={!selectedActor || !selectedProduct || isGenerating}
-            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2 mt-4"
+            className={`w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2 mt-4 rounded-bt font-medium transition-colors ${
+              generatedImage 
+                ? 'bg-bt-gray-200 text-bt-gray-600 hover:bg-bt-gray-300' 
+                : 'btn-primary'
+            }`}
           >
             {isGenerating ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
                 Genereren...
+              </>
+            ) : generatedImage ? (
+              <>
+                <RefreshCw className="w-4 h-4" />
+                Try New
               </>
             ) : (
               <>
@@ -304,12 +350,36 @@ export default function UGCVideoCreator() {
             ±{Math.max(1, Math.round(script.split(' ').filter(w => w).length * 0.4))} sec
           </p>
           <button
-            disabled={!generatedImage || isGenerating}
+            onClick={handleGenerateVideo}
+            disabled={!generatedImage || !script.trim() || isGeneratingVideo}
             className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2"
           >
-            <Video className="w-4 h-4" />
-            Genereer Video
+            {isGeneratingVideo ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Genereren...
+              </>
+            ) : (
+              <>
+                <Video className="w-4 h-4" />
+                Genereer Video
+              </>
+            )}
           </button>
+          
+          {generatedVideo && (
+            <div className="mt-4 p-3 bg-bt-green-50 rounded-bt border border-bt-green-200">
+              <p className="text-xs text-bt-green-700 font-medium mb-2">Video gegenereerd!</p>
+              <a 
+                href={generatedVideo} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xs text-bt-green-600 underline hover:text-bt-green-700"
+              >
+                Download video
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>
