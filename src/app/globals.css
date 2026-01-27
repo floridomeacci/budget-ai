@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bt-green-primary: #00A651;
+  --bt-green-dark: #008541;
+  --bt-green-light: #E8F5EC;
+  --bt-dark: #1A1A1A;
+  --bt-gray: #F5F5F5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  background-color: #F5F5F5;
+  color: #1A1A1A;
+  overflow-y: scroll;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-bt-green-500 hover:bg-bt-green-600 text-white font-semibold py-3 px-6 rounded-bt transition-all duration-200 shadow-bt hover:shadow-bt-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-bt-gray-100 text-bt-dark-800 font-medium py-3 px-6 rounded-bt border border-bt-gray-300 transition-all duration-200;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent hover:bg-bt-green-50 text-bt-green-500 font-medium py-3 px-6 rounded-bt border-2 border-bt-green-500 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-bt-lg shadow-bt p-6 transition-all duration-200 hover:shadow-bt-md;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-bt border border-bt-gray-300 focus:border-bt-green-500 focus:ring-2 focus:ring-bt-green-200 outline-none transition-all duration-200;
+  }
+
+  .tab-active {
+    @apply bg-bt-green-500 text-white;
+  }
+
+  .tab-inactive {
+    @apply bg-white text-bt-dark-700 hover:bg-bt-green-50 hover:text-bt-green-600;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F5F5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BDBDBD;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9E9E9E;
+}
+
+/* File upload styling */
+.file-upload-zone {
+  @apply border-2 border-dashed border-bt-gray-300 rounded-bt-lg p-8 text-center cursor-pointer transition-all duration-200;
+}
+
+.file-upload-zone:hover,
+.file-upload-zone.drag-over {
+  @apply border-bt-green-500 bg-bt-green-50;
+}
+
+/* Status badges */
+.badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.badge-pending {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-approved {
+  @apply bg-bt-green-100 text-bt-green-700;
+}
+
+.badge-rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-processing {
+  @apply bg-blue-100 text-blue-800;
+}
+
+/* Animation for loading states */
+@keyframes pulse-green {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Video aspect ratio */
+.aspect-9-16 {
+  aspect-ratio: 9 / 16;
+}
