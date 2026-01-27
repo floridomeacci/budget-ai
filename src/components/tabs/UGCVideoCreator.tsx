@@ -186,7 +186,7 @@ export default function UGCVideoCreator() {
                 onClick={() => setSelectedActor(actor.id)}
                 className={`rounded-bt-lg transition-all duration-200 overflow-hidden ${
                   selectedActor === actor.id
-                    ? 'ring-4 ring-black border-2 border-black'
+                    ? 'ring-[3px] ring-black'
                     : 'border-2 border-bt-gray-200 hover:border-bt-green-300'
                 }`}
               >
@@ -216,7 +216,7 @@ export default function UGCVideoCreator() {
                 onClick={() => setSelectedProduct(product.id)}
                 className={`rounded-bt-lg transition-all duration-200 overflow-hidden ${
                   selectedProduct === product.id
-                    ? 'ring-4 ring-black border-2 border-black'
+                    ? 'ring-[3px] ring-black'
                     : 'border-2 border-bt-gray-200 hover:border-bt-green-300'
                 }`}
               >
@@ -261,11 +261,6 @@ export default function UGCVideoCreator() {
                   alt="Generated UGC"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <button className="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
-                    <Play className="w-6 h-6 text-bt-green-600 ml-0.5" />
-                  </button>
-                </div>
                 <button
                   onClick={clearImage}
                   className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-lg hover:bg-bt-gray-100 transition-colors"
