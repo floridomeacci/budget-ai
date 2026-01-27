@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       resolution: string
       aspect_ratio: string
       generate_audio: boolean
-      reference_images?: { value: string }[]
+      reference_images?: string[]
     } = {
       prompt,
       duration: 8,
@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
       generate_audio: true,
     }
 
-    // Add reference image if provided
+    // Add reference image if provided (as array of URL strings)
     if (referenceImageUrl) {
-      input.reference_images = [{ value: referenceImageUrl }]
+      input.reference_images = [referenceImageUrl]
     }
 
     // Create prediction

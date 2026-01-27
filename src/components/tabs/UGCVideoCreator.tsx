@@ -49,7 +49,7 @@ export default function UGCVideoCreator() {
   const { addAsset } = useAssets()
   const [selectedActor, setSelectedActor] = useState<string | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
-  const [script, setScript] = useState('')
+  const [script, setScript] = useState('Oké maar serieus, sinds ik deze router heb... geen buffering meer! Mijn hele huis heeft nu perfect wifi. BudgetThuis, eindelijk iemand die het snapt.')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
