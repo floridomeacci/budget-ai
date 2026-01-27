@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// POST - Start video generation (returns prediction ID for polling)
 export async function POST(request: NextRequest) {
   try {
     const { prompt, referenceImageUrl } = await request.json()
@@ -15,6 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the input object for Veo 3.1
+    // Note: reference images only work with 16:9 aspect ratio per Veo 3.1 warning
     const input: {
       prompt: string
       duration: number
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
       prompt,
       duration: 8,
       resolution: '1080p',
-      aspect_ratio: '9:16',
+      aspect_ratio: '16:9', // Required for reference images
       generate_audio: true,
     }
 
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
       input.reference_images = [referenceImageUrl]
     }
 
-    // Create prediction
+    // Create prediction - returns immediately
     const createResponse = await fetch('https://api.replicate.com/v1/models/google/veo-3.1/predictions', {
       method: 'POST',
       headers: {
@@ -54,55 +56,61 @@ export async function POST(request: NextRequest) {
       }, { status: createResponse.status })
     }
 
-    // Poll for completion
-    let result = prediction
-    const maxAttempts = 120 // 10 minutes max (5 second intervals)
-    let attempts = 0
-
-    while (result.status !== 'succeeded' && result.status !== 'failed' && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
-      
-      const pollResponse = await fetch(result.urls.get, {
-        headers: {
-          'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
-        },
-      })
-      
-      result = await pollResponse.json()
-      attempts++
-      
-      console.log(`Video generation status: ${result.status} (attempt ${attempts})`)
-    }
-
-    if (result.status === 'failed') {
-      return NextResponse.json({ 
-        error: result.error || 'Video generation failed' 
-      }, { status: 500 })
-    }
-
-    if (result.status !== 'succeeded') {
-      return NextResponse.json({ 
-        error: 'Video generation timed out' 
-      }, { status: 504 })
-    }
-
-    // The output should be the video URL
-    const outputUrl = result.output
-
-    if (!outputUrl) {
-      return NextResponse.json({ error: 'No video generated' }, { status: 500 })
-    }
-
+    // Return prediction ID immediately - frontend will poll for status
     return NextResponse.json({ 
       success: true, 
-      outputUrl,
-      id: result.id
+      predictionId: prediction.id,
+      status: prediction.status
     })
 
   } catch (error) {
     console.error('Video generation error:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Failed to generate video' 
+    }, { status: 500 })
+  }
+}
+
+// GET - Check prediction status
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const predictionId = searchParams.get('id')
+
+    if (!predictionId) {
+      return NextResponse.json({ error: 'Prediction ID is required' }, { status: 400 })
+    }
+
+    const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN
+
+    if (!REPLICATE_API_TOKEN) {
+      return NextResponse.json({ error: 'Replicate API token not configured' }, { status: 500 })
+    }
+
+    const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+      headers: {
+        'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
+      },
+    })
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      return NextResponse.json({ 
+        error: result.detail || 'Failed to get prediction status' 
+      }, { status: response.status })
+    }
+
+    return NextResponse.json({
+      status: result.status,
+      output: result.output,
+      error: result.error
+    })
+
+  } catch (error) {
+    console.error('Status check error:', error)
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Failed to check status' 
     }, { status: 500 })
   }
 }

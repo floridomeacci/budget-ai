@@ -52,6 +52,7 @@ export default function UGCVideoCreator() {
   const [script, setScript] = useState('Oké maar serieus, sinds ik deze router heb... geen buffering meer! Mijn hele huis heeft nu perfect wifi. BudgetThuis, eindelijk iemand die het snapt.')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
+  const [videoProgress, setVideoProgress] = useState('')
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [generatedVideo, setGeneratedVideo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -128,8 +129,11 @@ export default function UGCVideoCreator() {
     
     setIsGeneratingVideo(true)
     setGeneratedVideo(null)
+    setError(null)
+    setVideoProgress('Starting...')
 
     try {
+      // Step 1: Start the video generation
       const response = await fetch('/api/create-video', {
         method: 'POST',
         headers: {
@@ -138,20 +142,48 @@ export default function UGCVideoCreator() {
         body: JSON.stringify({
           prompt: `${selectedActorData?.name || 'Person'} presenting ${selectedProductData?.name || 'product'}: ${script}`,
           referenceImageUrl: generatedImage,
-          duration: 8,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate video')
+        throw new Error(data.error || 'Failed to start video generation')
       }
 
-      setGeneratedVideo(data.outputUrl)
+      const predictionId = data.predictionId
+      setVideoProgress('Generating video...')
+
+      // Step 2: Poll for completion
+      let attempts = 0
+      const maxAttempts = 120 // 10 minutes max
+
+      while (attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 5000)) // Wait 5 seconds
+        
+        const statusResponse = await fetch(`/api/create-video?id=${predictionId}`)
+        const statusData = await statusResponse.json()
+
+        if (statusData.status === 'succeeded') {
+          setGeneratedVideo(statusData.output)
+          setVideoProgress('')
+          return
+        }
+
+        if (statusData.status === 'failed') {
+          throw new Error(statusData.error || 'Video generation failed')
+        }
+
+        attempts++
+        const elapsed = Math.round(attempts * 5 / 60)
+        setVideoProgress(`Generating... ${elapsed}+ min`)
+      }
+
+      throw new Error('Video generation timed out')
     } catch (err) {
       console.error('Video generation error:', err)
       setError(err instanceof Error ? err.message : 'Failed to generate video')
+      setVideoProgress('')
     } finally {
       setIsGeneratingVideo(false)
     }
@@ -352,7 +384,7 @@ export default function UGCVideoCreator() {
             {isGeneratingVideo ? (
               <>
                 <RefreshCw className="w-4 h-4 animate-spin" />
-                Genereren... (±2-5 min)
+                {videoProgress || 'Genereren...'}
               </>
             ) : (
               <>
@@ -365,6 +397,11 @@ export default function UGCVideoCreator() {
           {generatedVideo && (
             <div className="mt-4 p-3 bg-bt-green-50 rounded-bt border border-bt-green-200">
               <p className="text-xs text-bt-green-700 font-medium mb-2">Video gegenereerd!</p>
+              <video 
+                src={generatedVideo} 
+                controls 
+                className="w-full rounded-bt mb-2"
+              />
               <a 
                 href={generatedVideo} 
                 target="_blank" 
