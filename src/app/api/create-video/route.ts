@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the input object for Veo 3.1
-    // Note: reference images only work with 16:9 aspect ratio per Veo 3.1 warning
     const input: {
       prompt: string
       duration: number
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
       prompt,
       duration: 8,
       resolution: '1080p',
-      aspect_ratio: '16:9', // Required for reference images
+      aspect_ratio: '9:16', // Vertical video for social media
       generate_audio: true,
     }
 
