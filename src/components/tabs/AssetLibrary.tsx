@@ -161,13 +161,28 @@ export default function AssetLibrary() {
               key={asset.id}
               className="break-inside-avoid bg-white rounded-bt-lg overflow-hidden shadow-bt border border-bt-gray-200 group"
             >
-              {/* Image */}
+              {/* Image/Video */}
               <div className="relative">
-                <img
-                  src={asset.url}
-                  alt=""
-                  className="w-full h-auto"
-                />
+                {asset.type === 'ugc' ? (
+                  <video
+                    src={asset.url}
+                    className="w-full h-auto"
+                    muted
+                    loop
+                    playsInline
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause()
+                      e.currentTarget.currentTime = 0
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={asset.url}
+                    alt=""
+                    className="w-full h-auto"
+                  />
+                )}
                 
                 {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
