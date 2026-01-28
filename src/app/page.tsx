@@ -106,9 +106,9 @@ function DashboardContent() {
       </nav>
 
       {/* Tab Description */}
-      <div className="bg-bt-green-50 border-b border-bt-green-100">
+      <div className="bg-bt-green-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-bt-green-700 font-medium">
+          <p className="text-black font-bold text-lg">
             {tabs.find(t => t.id === activeTab)?.description}
           </p>
         </div>

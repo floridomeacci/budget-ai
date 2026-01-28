@@ -8,7 +8,8 @@ import {
   Image as ImageIcon,
   Video,
   Camera,
-  ImagePlus
+  ImagePlus,
+  Play
 } from 'lucide-react'
 import { useAssets, Asset } from '@/context/AssetContext'
 
@@ -164,18 +165,26 @@ export default function AssetLibrary() {
               {/* Image/Video */}
               <div className="relative">
                 {asset.type === 'ugc' ? (
-                  <video
-                    src={asset.url}
-                    className="w-full h-auto"
-                    muted
-                    loop
-                    playsInline
-                    onMouseEnter={(e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause()
-                      e.currentTarget.currentTime = 0
-                    }}
-                  />
+                  <>
+                    <video
+                      src={asset.url}
+                      className="w-full h-auto"
+                      muted
+                      loop
+                      playsInline
+                      onMouseEnter={(e) => e.currentTarget.play()}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.pause()
+                        e.currentTarget.currentTime = 0
+                      }}
+                    />
+                    {/* Play button overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                      <div className="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center">
+                        <Play className="w-6 h-6 text-white ml-1" fill="white" />
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <img
                     src={asset.url}
