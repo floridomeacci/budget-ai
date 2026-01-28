@@ -11,16 +11,16 @@ const config: Config = {
       colors: {
         // BudgetThuis Brand Colors
         'bt-green': {
-          50: '#E8F5EC',
-          100: '#D1EBD9',
-          200: '#A3D7B3',
-          300: '#75C38D',
-          400: '#47AF67',
-          500: '#00A651', // Primary Brand Green
-          600: '#008541',
-          700: '#006431',
-          800: '#004321',
-          900: '#002110',
+          50: '#E6F7F2',
+          100: '#CCF0E5',
+          200: '#99E1CB',
+          300: '#66D2B1',
+          400: '#52BC7D', // Secondary Green
+          500: '#00AA82', // Primary Brand Green
+          600: '#008868',
+          700: '#00664E',
+          800: '#004434',
+          900: '#00221A',
         },
         'bt-dark': {
           50: '#F5F5F5',

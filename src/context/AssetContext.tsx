@@ -22,8 +22,28 @@ interface AssetContextType {
 
 const AssetContext = createContext<AssetContextType | undefined>(undefined)
 
+// Demo assets that are always available
+const demoAssets: Asset[] = [
+  {
+    id: 'demo-photo-1',
+    url: '/demo/demo-photo.jpg',
+    type: 'create',
+    label: 'green',
+    createdAt: new Date('2026-01-28'),
+    prompt: 'Demo photo asset',
+  },
+  {
+    id: 'demo-video-1',
+    url: '/demo/demo-video.mp4',
+    type: 'ugc',
+    label: 'green',
+    createdAt: new Date('2026-01-28'),
+    prompt: 'Demo video asset',
+  },
+]
+
 export function AssetProvider({ children }: { children: ReactNode }) {
-  const [assets, setAssets] = useState<Asset[]>([])
+  const [assets, setAssets] = useState<Asset[]>(demoAssets)
 
   const addAsset = (asset: Omit<Asset, 'id' | 'createdAt'>) => {
     const newAsset: Asset = {

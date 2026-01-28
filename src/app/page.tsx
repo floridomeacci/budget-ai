@@ -69,15 +69,7 @@ function DashboardContent() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-bt-green-500 rounded-bt flex items-center justify-center">
-                <Leaf className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-bt-dark-800">
-                  Budget<span className="text-bt-green-500">Thuis</span>
-                </h1>
-                <p className="text-xs text-bt-gray-500 -mt-1">AI Creative Studio</p>
-              </div>
+              <img src="/images/btlogo.svg" alt="BudgetThuis" className="h-10" />
             </div>
 
             {/* User info */}
