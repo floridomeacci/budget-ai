@@ -167,19 +167,38 @@ export default function AssetLibrary() {
                 {asset.type === 'ugc' ? (
                   <>
                     <video
+                      id={`video-${asset.id}`}
                       src={asset.url}
-                      className="w-full h-auto"
+                      className="w-full h-auto cursor-pointer"
                       muted
                       loop
                       playsInline
-                      onMouseEnter={(e) => e.currentTarget.play()}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.pause()
-                        e.currentTarget.currentTime = 0
+                      onClick={(e) => {
+                        const video = e.currentTarget
+                        if (video.paused) {
+                          video.play()
+                        } else {
+                          video.pause()
+                        }
                       }}
                     />
-                    {/* Play button overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition-opacity">
+                    {/* Play button overlay - clickable */}
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center cursor-pointer video-play-overlay transition-opacity"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const video = document.getElementById(`video-${asset.id}`) as HTMLVideoElement
+                        if (video) {
+                          if (video.paused) {
+                            video.play()
+                            ;(e.currentTarget as HTMLElement).style.opacity = '0'
+                          } else {
+                            video.pause()
+                            ;(e.currentTarget as HTMLElement).style.opacity = '1'
+                          }
+                        }
+                      }}
+                    >
                       <div className="w-12 h-12 bg-black/60 rounded-full flex items-center justify-center">
                         <Play className="w-6 h-6 text-white ml-1" fill="white" />
                       </div>
@@ -193,21 +212,41 @@ export default function AssetLibrary() {
                   />
                 )}
                 
-                {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => handleDownload(asset.url)}
-                    className="p-2 bg-white rounded-full hover:bg-bt-gray-100 transition-colors"
-                  >
-                    <Download className="w-4 h-4 text-bt-dark-800" />
-                  </button>
-                  <button
-                    onClick={() => deleteAsset(asset.id)}
-                    className="p-2 bg-white rounded-full hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-500" />
-                  </button>
-                </div>
+                {/* Overlay on hover - only for images */}
+                {asset.type !== 'ugc' && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleDownload(asset.url)}
+                      className="p-2 bg-white rounded-full hover:bg-bt-gray-100 transition-colors"
+                    >
+                      <Download className="w-4 h-4 text-bt-dark-800" />
+                    </button>
+                    <button
+                      onClick={() => deleteAsset(asset.id)}
+                      className="p-2 bg-white rounded-full hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                )}
+                
+                {/* Action buttons for videos - positioned at top right */}
+                {asset.type === 'ugc' && (
+                  <div className="absolute top-2 right-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleDownload(asset.url)}
+                      className="p-1.5 bg-white rounded-full hover:bg-bt-gray-100 transition-colors shadow"
+                    >
+                      <Download className="w-3 h-3 text-bt-dark-800" />
+                    </button>
+                    <button
+                      onClick={() => deleteAsset(asset.id)}
+                      className="p-1.5 bg-white rounded-full hover:bg-red-50 transition-colors shadow"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Type badge */}
                 <div className="absolute top-2 left-2 px-2 py-1 bg-black/60 rounded text-white text-xs flex items-center gap-1">
